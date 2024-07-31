@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>戴尔风扇调速工具</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: url('https://github.com/Mapleawaa/images/raw/main/your-image.png') no-repeat center center fixed;
+            -webkit-background-size: cover;
+            -moz-background-size: cover;
+            -o-background-size: cover;
+            background-size: cover;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        h1, h2 {
+            color: white;
+            text-shadow: 1px 1px 2px black; /* x-offset, y-offset, blur-radius, color */
+            text-rendering: optimizeLegibility; /* Improve text clarity */
+            -webkit-text-stroke: 1px black; /* Webkit browsers */
+            -moz-text-stroke: 1px black; /* Firefox */
+            text-stroke: 1px black; /* Standard property */
+            text-align: center;
+        }
+        .content-box {
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            border: 1px solid #ddd;
+            padding: 1em;
+            margin: 1em;
+            border-radius: 5px;
+        }
+        #temperatureInfo p {
+            margin: 0.5em 0;
+        }
+        input[type="number"] {
+            padding: 0.5em;
+            width: 50%;
+            margin-bottom: 1em;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
+            background-color: rgba(255, 255, 255, 0.8); /* Semi-transparent white background */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            padding: 0.5em 1em;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            display: block;
+            margin: 0 auto;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        footer {
+            text-align: center;
+            padding: 1em;
+            color: #666;
+            flex-shrink: 0; /* Prevents footer from shrinking */
+        }
+        @media screen and (max-width: 768px) {
+            input[type="number"], button {
+                width: 80%; /* Adjust for smaller screens */
+            }
+        }
+    </style>
+    <script>
+        async function getStatus() {
+            const response = await fetch('/status');
+            const data = await response.json();
+            if (data.status === 'success') {
+                document.getElementById('fanSpeed').textContent = `当前风扇转速: ${data.fan_speed}%`;
+                const tempInfo = data.temperatures.map(temp => 
+                    `<p>${temp.sensor}: ${temp.temperature}°C (${temp.status})</p>`).join('');
+                document.getElementById('temperatureInfo').innerHTML = tempInfo;
+            }
+        }
+
+        async function setFanSpeed() {
+            const speed = document.getElementById('fanSpeedInput').value;
+            const response = await fetch('/set_fan_speed', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ speed }),
+            });
+            const data = await response.json();
+            alert(data.message);
+        }
+
+        document.addEventListener('DOMContentLoaded', getStatus);
+    </script>
+</head>
+<body>
+    <header>
+        <h1>戴尔风扇调速工具</h1>
+    </header>
+    <main>
+        <div class="content-box" id="fanSpeed">加载中...</div>
+        <div class="content-box" id="temperatureInfo">加载中...</div>
+        <hr>
+        <h2>设置风扇速度(每5%为一步)</h2>
+        <input type="number" id="fanSpeedInput" min="0" max="100" step="5">
+        <button onclick="setFanSpeed()">设置</button>
+    </main>
+    <footer>
+        <p>     Web By KiloMaple   </p>
+        <p>     由 Flask 强势驱动   </p>
+    </footer>
+</body>
+</html>
